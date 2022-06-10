@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="no">
+	<head>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, user-scalable=no"
+		/>
+		<title>joystick</title>
+		<style>
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: #333333;
+				min-height: 75vh;
+			}
+			.j__container {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				width: 35em;
+				height: 7em;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+			.j__lscontainer {
+				width: 8em;
+				height: 8em;
+				border-radius: 1em;
+				background-color: #222;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.j__stick {
+				width: 4em;
+				height: 4em;
+				background-color: firebrick;
+				border-radius: 1em;
+			}
+			.j__btns {
+				width: 7em;
+				height: 7em;
+				position: relative;
+			}
+			.j__btnA {
+				position: absolute;
+				background-color: green;
+				bottom: 0;
+				left: 0;
+			}
+			.j__btnB {
+				position: absolute;
+				background-color: red;
+				top: 0;
+				right: 0;
+			}
+			.j__btnA,
+			.j__btnB {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-family: sans-serif;
+				font-weight: bold;
+				color: white;
+				border-radius: 50%;
+				width: 50%;
+				height: 50%;
+				box-shadow: 0 0 0.5em black;
+				font-size: 1.5em;
+			}
+			.stickposition {
+				color: white;
+				font-size: 2em;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="j__container" draggable="false">
+			<div class="j__lscontainer">
+				<div id="lstick" class="j__stick"></div>
+			</div>
+			<div class="stickposition">
+				0,0
+			</div>
+			<div class="j__btns">
+				<div class="j__btnA">A</div>
+				<div class="j__btnB">B</div>
+			</div>
+		</div>
+		<script>
+			class stick {
+				constructor(id, maxX = 0, maxY = 0) {
+					this.value = { x: 0, y: 0 };
+					this.element = document.getElementById(id);
+					this.active = false;
+					this.dragStart = null;
+					this.touchId = null;
+					const click = (e) => {
+						this.active = true;
+						e.preventDefault();
+						if (e.changedTouches) {
+							this.dragStart = {
+								x: e.changedTouches[0].clientX,
+								y: e.changedTouches[0].clientY,
+							};
+							this.touchId = e.changedTouches[0].identifier;
+						} else {
+							this.dragStart = {
+								x: e.clientX,
+								y: e.clientY,
+							};
+						}
+					};
+					const move = (e) => {
+						if (!this.active) return;
+						let touchmoveId = null;
+						if (e.changedTouches) {
+							for (let i = 0; i < e.changedTouches.length; i++) {
+								if (e.changedTouches[i].identifier === this.touchId) {
+									touchmoveId = i;
+									e.clientX = e.changedTouches[i].clientX;
+									e.clientY = e.changedTouches[i].clientY;
+								}
+							}
+							if (touchmoveId === null) return;
+						}
+
+						let xDiff = e.clientX - this.dragStart.x;
+						let yDiff = e.clientY - this.dragStart.y;
+						Math.abs(xDiff) > maxX && (xDiff = maxX * Math.sign(xDiff));
+						Math.abs(yDiff) > maxY && (yDiff = maxY * Math.sign(yDiff));
+						this.value = {
+							x: xDiff,
+							y: yDiff,
+						};
+						this.element.style.transform = `translate(${xDiff}px, ${yDiff}px)`;
+					};
+					const up = (e) => {
+						this.value = {
+							x: 0,
+							y: 0,
+						};
+						if (!this.active) return;
+						if (
+							e.changedTouches &&
+							this.touchId !== e.changedTouches[0].identifier
+						)
+							return;
+						this.element.style.transform = 'translate(0, 0)';
+						this.touchId = null;
+						this.active = false;
+					};
+					this.element.addEventListener('mouseup', up);
+					this.element.addEventListener('touchend', up);
+					this.element.addEventListener('mousedown', click);
+					this.element.addEventListener('touchstart', click);
+					this.element.addEventListener('mousemove', move);
+					this.element.addEventListener('touchmove', move);
+				}
+			}
+
+			const stickPositionPrint = document.querySelector('.stickposition');
+			let stickA = new stick('lstick', 64, 64);
+			const loop = () => {
+				requestAnimationFrame(loop);
+				stickPositionPrint.innerHTML = `${stickA.value.x}, ${stickA.value.y}`;
+			};
+			loop();
+		</script>
+	</body>
+</html>
