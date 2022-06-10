@@ -169,7 +169,7 @@
 			let stickA = new stick('lstick', 64, 64);
 			const loop = () => {
 				requestAnimationFrame(loop);
-				stickPositionPrint.innerHTML = `${stickA.value.x}, ${stickA.value.y}`;
+				stickPositionPrint.innerHTML = `${Math.round(stickA.value.x)}, ${Math.round(stickA.value.y)}`;
 			};
 			loop();
 		</script>
