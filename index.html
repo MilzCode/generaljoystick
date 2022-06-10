@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="mul">
 	<head>
 		<meta
 			name="viewport"
@@ -73,7 +73,7 @@
 				box-shadow: 0 0 0.5em black;
 				font-size: 1.5em;
 			}
-			.stickposition {
+			.info {
 				color: white;
 				font-size: 2em;
 				font-weight: bold;
@@ -85,12 +85,21 @@
 			<div class="j__lscontainer">
 				<div id="lstick" class="j__stick"></div>
 			</div>
-			<div class="stickposition">
-				0,0
+			<div>
+				<div id="stickposition" class="info">
+					0,0
+				</div>
+				<div id="infobtna" class="info">
+					-
+				</div>
+				<div id="infobtnb" class="info">
+					-
+				</div>
 			</div>
+
 			<div class="j__btns">
-				<div class="j__btnA">A</div>
-				<div class="j__btnB">B</div>
+				<div id="btnA" class="j__btnA">A</div>
+				<div id="btnB" class="j__btnB">B</div>
 			</div>
 		</div>
 		<script>
@@ -164,12 +173,37 @@
 					this.element.addEventListener('touchmove', move);
 				}
 			}
+			class button {
+				constructor(id) {
+					this.element = document.getElementById(id);
+					this.active = false;
+					const click = (e) => {
+						this.active = true;
+						e.preventDefault();
+					};
+					const up = (e) => {
+						this.active = false;
+					};
+					this.element.addEventListener('mouseup', up);
+					this.element.addEventListener('touchend', up);
+					this.element.addEventListener('mousedown', click);
+					this.element.addEventListener('touchstart', click);
+				}
+			}
+			const infoStick = document.getElementById('stickposition');
+			const infoBtnA = document.getElementById('infobtna');
+			const infoBtnB = document.getElementById('infobtnb');
 
-			const stickPositionPrint = document.querySelector('.stickposition');
 			let stickA = new stick('lstick', 64, 64);
+			let btnA = new button('btnA');
+			let btnB = new button('btnB');
 			const loop = () => {
 				requestAnimationFrame(loop);
-				stickPositionPrint.innerHTML = `${Math.round(stickA.value.x)}, ${Math.round(stickA.value.y)}`;
+				infoStick.innerHTML = `${Math.round(stickA.value.x)}, ${Math.round(
+					stickA.value.y
+				)}`;
+				infoBtnA.innerHTML = btnA.active ? 'A' : '-';
+				infoBtnB.innerHTML = btnB.active ? 'B' : '-';
 			};
 			loop();
 		</script>
