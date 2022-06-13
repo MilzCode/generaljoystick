@@ -144,8 +144,8 @@
 							if (touchmoveId === null) return;
 						}
 
-						let xDiff = e.clientX - this.dragStart.x;
-						let yDiff = e.clientY - this.dragStart.y;
+						let xDiff = Math.floor(e.clientX - this.dragStart.x);
+						let yDiff = Math.floor(e.clientY - this.dragStart.y);
 						Math.abs(xDiff) > maxX && (xDiff = maxX * Math.sign(xDiff));
 						Math.abs(yDiff) > maxY && (yDiff = maxY * Math.sign(yDiff));
 						this.value = {
@@ -202,7 +202,34 @@
 			let stickA = new stick('lstick', 64, 64);
 			let btnA = new button('btnA');
 			let btnB = new button('btnB');
+			let lastBtnA = false;
+			let lastBtnB = false;
+			let lastStick = { x: 0, y: 0 };
 			const loop = () => {
+				//button and stick behavior control
+				if (lastBtnA !== btnA.active) {
+					lastBtnA = btnA.active;
+					if (btnA.active) {
+						console.log('A pressed');
+						//vibrate for movile devices if button is pressed
+						window.navigator.vibrate(60);
+					} else {
+						console.log('A released');
+					}
+				}
+				if (lastBtnB !== btnB.active) {
+					lastBtnB = btnB.active;
+					if (btnB.active) {
+						window.navigator.vibrate(60);
+						console.log('B pressed');
+					} else {
+						console.log('B released');
+					}
+				}
+				if (lastStick.x !== stickA.value.x || lastStick.y !== stickA.value.y) {
+					lastStick = { x: stickA.value.x, y: stickA.value.y };
+					console.log(`Stick: ${stickA.value.x}, ${stickA.value.y}`);
+				}
 				requestAnimationFrame(loop);
 				infoStick.innerHTML = `${Math.round(stickA.value.x)}, ${Math.round(
 					stickA.value.y
