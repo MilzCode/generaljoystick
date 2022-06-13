@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="mul">
+	<head>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, user-scalable=no"
+		/>
+		<title>joystick</title>
+		<style>
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: #333;
+				min-height: 75vh;
+			}
+			.j__container {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				width: 35em;
+				height: 7em;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+			.j__lscontainer {
+				width: 8em;
+				height: 8em;
+				border-radius: 1em;
+				background-color: #222;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.j__stick {
+				width: 4em;
+				height: 4em;
+				background-color: firebrick;
+				border-radius: 1em;
+			}
+			.j__btns {
+				width: 7em;
+				height: 7em;
+				position: relative;
+			}
+			.j__btnA {
+				background-color: green;
+				bottom: 0;
+				left: 0;
+			}
+			.j__btnB {
+				background-color: red;
+				top: 0;
+				right: 0;
+			}
+			.j__btnA,
+			.j__btnB {
+				position: absolute;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-family: sans-serif;
+				font-weight: bold;
+				color: white;
+				border-radius: 50%;
+				width: 50%;
+				height: 50%;
+				box-shadow: 0 0 0.5em black;
+				font-size: 1.5em;
+			}
+			.info {
+				color: white;
+				font-size: 2em;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="j__container" draggable="false">
+			<div class="j__lscontainer">
+				<div id="lstick" class="j__stick"></div>
+			</div>
+			<div>
+				<div id="stickposition" class="info">
+					0,0
+				</div>
+				<div id="infobtna" class="info">
+					-
+				</div>
+				<div id="infobtnb" class="info">
+					-
+				</div>
+			</div>
+
+			<div class="j__btns">
+				<div id="btnA" class="j__btnA">A</div>
+				<div id="btnB" class="j__btnB">B</div>
+			</div>
+		</div>
+		<script>
+			let gateway = `ws://${window.location.hostname}/ws`;
+			let websocket = new WebSocket(gateway);
+			function sendMsg(msg) {
+				if (!websocket.readyState) {
+					return;
+				}
+				websocket.send(msg);
+			}
+			class stick {
+				constructor(id, maxX = 0, maxY = 0) {
+					this.value = { x: 0, y: 0 };
+					this.element = document.getElementById(id);
+					this.active = false;
+					this.dragStart = null;
+					this.touchId = null;
+					const click = (e) => {
+						this.active = true;
+						e.preventDefault();
+						if (e.changedTouches) {
+							this.dragStart = {
+								x: e.changedTouches[0].clientX,
+								y: e.changedTouches[0].clientY,
+							};
+							this.touchId = e.changedTouches[0].identifier;
+						} else {
+							this.dragStart = {
+								x: e.clientX,
+								y: e.clientY,
+							};
+						}
+					};
+					const move = (e) => {
+						if (!this.active) return;
+						let touchmoveId = null;
+						if (e.changedTouches) {
+							for (let i = 0; i < e.changedTouches.length; i++) {
+								if (e.changedTouches[i].identifier === this.touchId) {
+									touchmoveId = i;
+									e.clientX = e.changedTouches[i].clientX;
+									e.clientY = e.changedTouches[i].clientY;
+								}
+							}
+							if (touchmoveId === null) return;
+						}
+
+						let xDiff = Math.floor(e.clientX - this.dragStart.x);
+						let yDiff = Math.floor(e.clientY - this.dragStart.y);
+						Math.abs(xDiff) > maxX && (xDiff = maxX * Math.sign(xDiff));
+						Math.abs(yDiff) > maxY && (yDiff = maxY * Math.sign(yDiff));
+						this.value = {
+							x: xDiff,
+							y: yDiff,
+						};
+						this.element.style.transform = `translate(${xDiff}px, ${yDiff}px)`;
+					};
+					const up = (e) => {
+						this.value = {
+							x: 0,
+							y: 0,
+						};
+						if (!this.active) return;
+						if (
+							e.changedTouches &&
+							this.touchId !== e.changedTouches[0].identifier
+						)
+							return;
+						this.element.style.transform = 'translate(0, 0)';
+						this.touchId = null;
+						this.active = false;
+					};
+
+					document.addEventListener('mouseup', up);
+					document.addEventListener('touchend', up);
+					this.element.addEventListener('mousedown', click);
+					this.element.addEventListener('touchstart', click);
+					document.addEventListener('mousemove', move);
+					document.addEventListener('touchmove', move);
+				}
+			}
+			class button {
+				constructor(id) {
+					this.element = document.getElementById(id);
+					this.active = false;
+					const click = (e) => {
+						this.active = true;
+						e.preventDefault();
+					};
+					const up = (e) => {
+						this.active = false;
+					};
+					document.addEventListener('mouseup', up);
+					document.addEventListener('touchend', up);
+					this.element.addEventListener('mousedown', click);
+					this.element.addEventListener('touchstart', click);
+				}
+			}
+			const infoStick = document.getElementById('stickposition');
+			const infoBtnA = document.getElementById('infobtna');
+			const infoBtnB = document.getElementById('infobtnb');
+
+			let stickA = new stick('lstick', 64, 64);
+			let btnA = new button('btnA');
+			let btnB = new button('btnB');
+			let lastBtnA = false;
+			let lastBtnB = false;
+			let lastStick = { x: 0, y: 0 };
+			const loop = () => {
+				//button and stick behavior control
+				if (lastBtnA !== btnA.active) {
+					lastBtnA = btnA.active;
+					if (btnA.active) {
+						sendMsg('A+');
+						console.log('A pressed');
+						btnA.element.style = 'transform: scale(0.9);';
+						//vibrate for movile devices if button is pressed
+						window.navigator.vibrate(60);
+					} else {
+						sendMsg('A-');
+						btnA.element.style = 'transform: scale(1);';
+						console.log('A released');
+					}
+				}
+				if (lastBtnB !== btnB.active) {
+					lastBtnB = btnB.active;
+					if (btnB.active) {
+						sendMsg('B+');
+						console.log('B pressed');
+						btnB.element.style = 'transform: scale(0.9);';
+						window.navigator.vibrate(60);
+					} else {
+						sendMsg('B-');
+						btnB.element.style = 'transform: scale(1);';
+						console.log('B released');
+					}
+				}
+				if (lastStick.x !== stickA.value.x || lastStick.y !== stickA.value.y) {
+					sendMsg(`${stickA.value.x},${stickA.value.y}`);
+					/*
+					or
+					sendMsg("X:"+stickA.value.x);
+					sendMsg("Y:"+stickA.value.y);
+					*/
+					lastStick = { x: stickA.value.x, y: stickA.value.y };
+					console.log(`Stick: ${stickA.value.x}, ${stickA.value.y}`);
+				}
+				requestAnimationFrame(loop);
+				infoStick.innerHTML = `${Math.round(stickA.value.x)}, ${Math.round(
+					stickA.value.y
+				)}`;
+				infoBtnA.innerHTML = btnA.active ? 'A' : '-';
+				infoBtnB.innerHTML = btnB.active ? 'B' : '-';
+			};
+			loop();
+		</script>
+	</body>
+</html>
