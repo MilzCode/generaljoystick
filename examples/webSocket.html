@@ -207,7 +207,7 @@
 			let btnB = new button('btnB');
 			let lastBtnA = false;
 			let lastBtnB = false;
-			let lastStick = { x: 0, y: 0 };
+			let lastStick = { x: null, y: null };
 			const loop = () => {
 				//button and stick behavior control
 				if (lastBtnA !== btnA.active) {
@@ -238,12 +238,7 @@
 					}
 				}
 				if (lastStick.x !== stickA.value.x || lastStick.y !== stickA.value.y) {
-					sendMsg(`${stickA.value.x},${stickA.value.y}`);
-					/*
-					or
-					sendMsg("X:"+stickA.value.x);
-					sendMsg("Y:"+stickA.value.y);
-					*/
+					sendMsg('X:' + stickA.value.x + ',Y:' + stickA.value.y);
 					lastStick = { x: stickA.value.x, y: stickA.value.y };
 					console.log(`Stick: ${stickA.value.x}, ${stickA.value.y}`);
 				}
