@@ -11,7 +11,7 @@
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				background-color: #333333;
+				background-color: #333;
 				min-height: 75vh;
 			}
 			.j__container {
@@ -169,12 +169,13 @@
 						this.touchId = null;
 						this.active = false;
 					};
-					this.element.addEventListener('mouseup', up);
-					this.element.addEventListener('touchend', up);
+
+					document.addEventListener('mouseup', up);
+					document.addEventListener('touchend', up);
 					this.element.addEventListener('mousedown', click);
 					this.element.addEventListener('touchstart', click);
-					this.element.addEventListener('mousemove', move);
-					this.element.addEventListener('touchmove', move);
+					document.addEventListener('mousemove', move);
+					document.addEventListener('touchmove', move);
 				}
 			}
 			class button {
@@ -188,8 +189,8 @@
 					const up = (e) => {
 						this.active = false;
 					};
-					this.element.addEventListener('mouseup', up);
-					this.element.addEventListener('touchend', up);
+					document.addEventListener('mouseup', up);
+					document.addEventListener('touchend', up);
 					this.element.addEventListener('mousedown', click);
 					this.element.addEventListener('touchstart', click);
 				}
