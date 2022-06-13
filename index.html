@@ -48,19 +48,18 @@
 				position: relative;
 			}
 			.j__btnA {
-				position: absolute;
 				background-color: green;
 				bottom: 0;
 				left: 0;
 			}
 			.j__btnB {
-				position: absolute;
 				background-color: red;
 				top: 0;
 				right: 0;
 			}
 			.j__btnA,
 			.j__btnB {
+				position: absolute;
 				display: flex;
 				justify-content: center;
 				align-items: center;
@@ -72,10 +71,6 @@
 				height: 50%;
 				box-shadow: 0 0 0.5em black;
 				font-size: 1.5em;
-			}
-			.j__btnA:active,
-			.j__btnB:active {
-				transform: scale(0.9);
 			}
 			.info {
 				color: white;
@@ -211,18 +206,22 @@
 					lastBtnA = btnA.active;
 					if (btnA.active) {
 						console.log('A pressed');
+						btnA.element.style = 'transform: scale(0.9);';
 						//vibrate for movile devices if button is pressed
 						window.navigator.vibrate(60);
 					} else {
+						btnA.element.style = 'transform: scale(1);';
 						console.log('A released');
 					}
 				}
 				if (lastBtnB !== btnB.active) {
 					lastBtnB = btnB.active;
 					if (btnB.active) {
-						window.navigator.vibrate(60);
 						console.log('B pressed');
+						btnB.element.style = 'transform: scale(0.9);';
+						window.navigator.vibrate(60);
 					} else {
+						btnB.element.style = 'transform: scale(1);';
 						console.log('B released');
 					}
 				}
