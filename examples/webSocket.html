@@ -66,9 +66,9 @@
 				font-family: sans-serif;
 				font-weight: bold;
 				color: white;
-				border-radius: 50%;
-				width: 50%;
-				height: 50%;
+				border-radius: 56px;
+				width: 56px;
+				height: 56px;
 				box-shadow: 0 0 0.5em black;
 				font-size: 1.5em;
 			}
@@ -174,11 +174,11 @@
 					};
 
 					document.addEventListener('mouseup', up);
-					document.addEventListener('touchend', up);
+					this.element.addEventListener('touchend', up);
 					this.element.addEventListener('mousedown', click);
 					this.element.addEventListener('touchstart', click);
 					document.addEventListener('mousemove', move);
-					document.addEventListener('touchmove', move);
+					this.element.addEventListener('touchmove', move);
 				}
 			}
 			class button {
@@ -193,7 +193,7 @@
 						this.active = false;
 					};
 					document.addEventListener('mouseup', up);
-					document.addEventListener('touchend', up);
+					this.element.addEventListener('touchend', up);
 					this.element.addEventListener('mousedown', click);
 					this.element.addEventListener('touchstart', click);
 				}
